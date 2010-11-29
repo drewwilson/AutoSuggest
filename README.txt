@@ -2,8 +2,8 @@ AutoSuggest
 
 Copyright 2009-2010 Drew Wilson
 
-www.drewwilson.com
-code.drewwilson.com/entry/autosuggest-jquery-plugin
+http://www.drewwilson.com
+http://code.drewwilson.com/entry/autosuggest-jquery-plugin
 
 Version 1.4   -   Updated: Mar. 23, 2010
 
