@@ -87,7 +87,7 @@
 					var vals = opts.preFill.split(",");					
 					for(var i=0; i < vals.length; i++){
 						var v_data = {};
-						v_data[opts.selectedValuesProp] = vals[i];
+						v_data[opts.selectedItemProp] = vals[i]; // Change for string preFill work
 						if(vals[i] != ""){
 							add_selected_item(v_data, "000"+i);	
 						}		
