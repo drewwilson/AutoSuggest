@@ -182,6 +182,22 @@
 							}
 							break;
 						case 9: case 188:  // tab or comma
+							// support tab index navigation (move to next and previous fields)
+							if(!input.val() && $(this).attr("tabindex")){
+								try {
+									var next_input = parseInt($(this).attr("tabindex"))
+									if(e.shiftKey){
+										next_input--
+									}else{
+										next_input++
+									}
+									e.preventDefault();
+									$('input[tabindex="'+next_input+'"]').focus()
+								}catch(ex){
+									// the tab index value was not a integer
+								}		
+								break;						
+							}
 							tab_press = true;
 							var i_input = input.val().replace(/(,)/g, "");
 							if(i_input != "" && values_input.val().search(","+i_input+",") < 0 && i_input.length >= opts.minChars){	
