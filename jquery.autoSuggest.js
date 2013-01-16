@@ -11,7 +11,7 @@
  * the fly. It supports keybord navigation (UP + DOWN + RETURN), as well
  * as multiple AutoSuggest fields on the same page.
  *
- * Inspied by the Autocomplete plugin by: Jšrn Zaefferer
+ * Inspied by the Autocomplete plugin by: Jï¿½rn Zaefferer
  * and the Facelist plugin by: Ian Tearle (iantearle.com)
  *
  * This AutoSuggest jQuery plug-in is dual licensed under the MIT and GPL licenses:
@@ -164,8 +164,11 @@
 								var last = values_input.val().split(",");
 								last = last[last.length - 2];
 								selections_holder.children().not(org_li.prev()).removeClass("selected");
-								if(org_li.prev().hasClass("selected")){
-									values_input.val(values_input.val().replace(","+last+",",","));
+    							if(org_li.prev().hasClass("selected")){
+                                    var val_ar = values_input.val().split(",");
+                                    val_ar.splice( val_ar.indexOf(data[opts.selectedValuesProp]) , 1 );
+                                    values_input.val(val_ar.join(","));
+                                    
 									opts.selectionRemoved.call(this, org_li.prev());
 								} else {
 									opts.selectionClick.call(this, org_li.prev());
@@ -324,14 +327,20 @@
 				}
 				
 				function add_selected_item(data, num){
-					values_input.val(values_input.val()+data[opts.selectedValuesProp]+",");
+				    !values_input.val() && values_input.val().trim().length===0 ?
+				        values_input.val(data[opts.selectedValuesProp]) :
+				        values_input.val(values_input.val()+","+data[opts.selectedValuesProp]);
+					
 					var item = $('<li class="as-selection-item" id="as-selection-'+num+'"></li>').click(function(){
 							opts.selectionClick.call(this, $(this));
 							selections_holder.children().removeClass("selected");
 							$(this).addClass("selected");
 						}).mousedown(function(){ input_focus = false; });
 					var close = $('<a class="as-close">&times;</a>').click(function(){
-							values_input.val(values_input.val().replace(","+data[opts.selectedValuesProp]+",",","));
+					        var val_ar = values_input.val().split(",");
+                            val_ar.splice( val_ar.indexOf(data[opts.selectedValuesProp]) , 1 );
+                            values_input.val(val_ar.join(","));
+                            
 							opts.selectionRemoved.call(this, item);
 							input_focus = true;
 							input.focus();
