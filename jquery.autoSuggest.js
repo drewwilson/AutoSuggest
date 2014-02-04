@@ -271,10 +271,18 @@
 							}
 						}
 						if(str){
-							if (!opts.matchCase){ str = str.toLowerCase(); }				
-							if(str.search(query) != -1 && values_input.val().search(","+data[num][opts.selectedValuesProp]+",") == -1){
-								forward = true;
-							}	
+							if (!opts.matchCase){ str = str.toLowerCase(); }
+							// Figure out whether to move forward based on
+							// conditions. If the query matches, and the
+							// allowDuplicates options is set, forward. If that
+							// option is not set, make we're not looking for
+							// an item that has already been selected.
+							forward = str.search(query) != -1 &&
+								(opts.allowDuplicates ? true :
+								values_input.val().search("," +
+								data[num][opts.selectedValuesProp] +
+								",") == -1
+								);
 						}
 						if(forward){
 							var formatted = $('<li class="as-result-item" id="as-result-item-'+num+'"></li>').click(function(){
