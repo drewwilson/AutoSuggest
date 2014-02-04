@@ -29,6 +29,7 @@
 			limitText: "No More Selections Are Allowed",
 			selectedItemProp: "value", //name of object property
 			selectedValuesProp: "value", //name of object property
+			searchActive: true, // search results provided with query
 			searchObjProps: "value", //comma separated list of object property names
 			queryParam: "q",
 			retrieveLimit: false, //number for 'limit' param on ajax request
@@ -259,22 +260,26 @@
 					for(var i=0;i<d_count;i++){				
 						var num = i;
 						num_count++;
-						var forward = false;
-						if(opts.searchObjProps == "value") {
-							var str = data[num].value;
-						} else {	
-							var str = "";
-							var names = opts.searchObjProps.split(",");
-							for(var y=0;y<names.length;y++){
-								var name = $.trim(names[y]);
-								str = str+data[num][name]+" ";
+						if (opts.searchActive) { // Perform search operations if search option is set to 'true'
+							var forward = false;						
+							if(opts.searchObjProps == "value") {
+								var str = data[num].value;
+							} else {	
+								var str = "";
+								var names = opts.searchObjProps.split(",");
+								for(var y=0;y<names.length;y++){
+									var name = $.trim(names[y]);
+									str = str+data[num][name]+" ";
+								}
 							}
-						}
-						if(str){
-							if (!opts.matchCase){ str = str.toLowerCase(); }				
-							if(str.search(query) != -1 && values_input.val().search(","+data[num][opts.selectedValuesProp]+",") == -1){
-								forward = true;
-							}	
+							if(str){
+								if (!opts.matchCase){ str = str.toLowerCase(); }				
+								if(str.search(query) != -1 && values_input.val().search(","+data[num][opts.selectedValuesProp]+",") == -1){
+									forward = true;
+								}	
+							}
+						} else {
+							var forward = true;
 						}
 						if(forward){
 							var formatted = $('<li class="as-result-item" id="as-result-item-'+num+'"></li>').click(function(){
