@@ -4,7 +4,7 @@
  * www.drewwilson.com
  * code.drewwilson.com/entry/autosuggest-jquery-plugin
  *
- * Version 1.4   -   Updated: Mar. 23, 2010
+ * Version 1.4 fork   -   Updated: January 9, 2011
  *
  * This Plug-In will auto-complete or auto-suggest completed search queries
  * for you as you type. You can add multiple selections and remove them on
@@ -13,6 +13,8 @@
  *
  * Inspied by the Autocomplete plugin by: Jšrn Zaefferer
  * and the Facelist plugin by: Ian Tearle (iantearle.com)
+ *
+ * Contributor: Alan Hogan (http://alanhogan.com)
  *
  * This AutoSuggest jQuery plug-in is dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
@@ -39,6 +41,7 @@
 			resultsHighlight: true,
 			neverSubmit: false,
 			selectionLimit: false,
+			spaceSeparatesItems: false,
 			showResultList: true,
 		  	start: function(){},
 		  	selectionClick: function(elem){},
@@ -61,7 +64,7 @@
 			var org_data = data;
 			for (k in data) if (data.hasOwnProperty(k)) d_count++;
 		}
-		if((d_type == "object" && d_count > 0) || d_type == "string"){
+		if((d_type == "object") || d_type == "string" ){
 			return this.each(function(x){
 				if(!opts.asHtmlID){
 					x = x+""+Math.floor(Math.random()*100); //this ensures there will be unique IDs on the page if autoSuggest() is called multiple times
@@ -72,7 +75,7 @@
 				}
 				opts.start.call(this);
 				var input = $(this);
-				input.attr("autocomplete","off").addClass("as-input").attr("id",x_id).val(opts.startText);
+				input.attr("autocomplete","off").addClass("as-input").attr("id",x_id).val(opts.startText).addClass('as-prompt');
 				var input_focus = false;
 				
 				// Setup basic elements and render them to the DOM
@@ -109,14 +112,18 @@
 					}
 				}
 				if(prefill_value != ""){
-					input.val("");
+					input.val("").removeClass('as-prompt');
 					var lastChar = prefill_value.substring(prefill_value.length-1);
 					if(lastChar != ","){ prefill_value = prefill_value+","; }
 					values_input.val(","+prefill_value);
 					$("li.as-selection-item", selections_holder).addClass("blur").removeClass("selected");
 				}
 				input.after(values_input);
-				selections_holder.click(function(){
+				selections_holder.click(function(e){
+          if($(e.target).is(selections_holder.selector)) { 
+            // Clicking the box itself? Clear selected items
+            selections_holder.children().removeClass("selected");
+          }
 					input_focus = true;
 					input.focus();
 				}).mousedown(function(){ input_focus = false; }).after(results_holder);	
@@ -129,7 +136,7 @@
 				// Handle input field events
 				input.focus(function(){			
 					if($(this).val() == opts.startText && values_input.val() == ""){
-						$(this).val("");
+						$(this).val("").removeClass('as-prompt');
 					} else if(input_focus){
 						$("li.as-selection-item", selections_holder).removeClass("blur");
 						if($(this).val() != ""){
@@ -139,9 +146,11 @@
 					}
 					input_focus = true;
 					return true;
+				}).click(function(){
+				  selections_holder.children().removeClass("selected");
 				}).blur(function(){
 					if($(this).val() == "" && values_input.val() == "" && prefill_value == ""){
-						$(this).val(opts.startText);
+						$(this).val(opts.startText).addClass('as-prompt');
 					} else if(input_focus){
 						$("li.as-selection-item", selections_holder).addClass("blur").removeClass("selected");
 						results_holder.hide();
@@ -181,29 +190,44 @@
 								timeout = setTimeout(function(){ keyChange(); }, opts.keyDelay);
 							}
 							break;
-						case 9: case 188:  // tab or comma
-							tab_press = true;
-							var i_input = input.val().replace(/(,)/g, "");
-							if(i_input != "" && values_input.val().search(","+i_input+",") < 0 && i_input.length >= opts.minChars){	
-								e.preventDefault();
-								var n_data = {};
-								n_data[opts.selectedItemProp] = i_input;
-								n_data[opts.selectedValuesProp] = i_input;																				
-								var lis = $("li", selections_holder).length;
-								add_selected_item(n_data, "00"+(lis+1));
-								input.val("");
-							}
 						case 13: // return
 							tab_press = false;
 							var active = $("li.active:first", results_holder);
 							if(active.length > 0){
 								active.click();
 								results_holder.hide();
+							} else {
+							  var i_input = input.val().replace(/(,)/g, "");
+  							if(i_input != "" && values_input.val().search(","+i_input+",") < 0 && i_input.length >= opts.minChars){	
+			  				  tab_press = true; // Maybe? Drew?
+  								e.preventDefault();
+  								var n_data = {};
+  								n_data[opts.selectedItemProp] = i_input;
+  								n_data[opts.selectedValuesProp] = i_input;																				
+  								var lis = $("li", selections_holder).length;
+  								add_selected_item(n_data, "00"+(lis+1));
+  								input.val("");
+  							}
 							}
 							if(opts.neverSubmit || active.length > 0){
 								e.preventDefault();
 							}
 							break;
+            case 32: case 9: case 188:  // space, tab, or comma (in that order)
+						  if(opts.spaceSeparatesItems || e.keyCode !== 32) { //space separates items OR not space?
+  							tab_press = true;
+  							var i_input = input.val().replace(/(,)/g, "");
+  							if(opts.spaceSeparatesItems) {i_input = i_input.replace(/ /g,'');}
+  							if(i_input != "" && values_input.val().search(","+i_input+",") < 0 && i_input.length >= opts.minChars){	
+  								e.preventDefault();
+  								var n_data = {};
+  								n_data[opts.selectedItemProp] = i_input;
+  								n_data[opts.selectedValuesProp] = i_input;																				
+  								var lis = $("li", selections_holder).length;
+  								add_selected_item(n_data, "00"+(lis+1));
+  								input.val("");
+  							}
+						  } // else fall thru to default (intentional), in case of a space when spaces allowed in items.
 						default:
 							if(opts.showResultList){
 								if(opts.selectionLimit && $("li.as-selection-item", selections_holder).length >= opts.selectionLimit){
@@ -316,7 +340,7 @@
 					}
 					selections_holder.removeClass("loading");
 					if(matchCount <= 0){
-						results_ul.html('<li class="as-message">'+opts.emptyText+'</li>');
+						results_ul.html('<li class="as-message as-no-results">'+opts.emptyText+'</li>');
 					}
 					results_ul.css("width", selections_holder.outerWidth());
 					results_holder.show();
@@ -337,7 +361,7 @@
 							input.focus();
 							return false;
 						});
-					org_li.before(item.html(data[opts.selectedItemProp]).prepend(close));
+					org_li.before(item.text(data[opts.selectedItemProp]).prepend(close));
 					opts.selectionAdded.call(this, org_li.prev());	
 				}
 				

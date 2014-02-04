@@ -15,6 +15,9 @@ as multiple AutoSuggest fields on the same page.
 Inspied by the Autocomplete plugin by: Jšrn Zaefferer
 and the Facelist plugin by: Ian Tearle (iantearle.com)
 
+Contributors:
+Alan Hogan (http://alanhogan.com)
+
 This AutoSuggest jQuery plug-in is dual licensed under the MIT and GPL licenses:
 http://www.opensource.org/licenses/mit-license.php
 http://www.gnu.org/licenses/gpl.html
